@@ -2,11 +2,12 @@
 
 #include "Abilities/GSCAbilitySystemUtils.h"
 
-#include "GSCLog.h"
 #include "Abilities/GSCAbilitySystemComponent.h"
 #include "Components/GSCAbilityInputBindingComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/GameInstance.h"
+#include "GSCLog.h"
+#include "Misc/EngineVersionComparison.h"
 
 void FGSCAbilitySystemUtils::TryGrantAbility(UAbilitySystemComponent* InASC, const FGSCGameFeatureAbilityMapping& InAbilityMapping, FGameplayAbilitySpecHandle& OutAbilityHandle, FGameplayAbilitySpec& OutAbilitySpec)
 {
@@ -425,7 +426,11 @@ void FGSCAbilitySystemUtils::AddLooseGameplayTagsUnique(UAbilitySystemComponent*
 	InASC->AddLooseGameplayTags(TagsToAdd);
 	if (bReplicated)
 	{
+#if UE_VERSION_NEWER_THAN(5, 7, -1)
+		InASC->AddLooseGameplayTags(TagsToAdd);
+#else
 		InASC->AddReplicatedLooseGameplayTags(TagsToAdd);
+#endif
 	}
 }
 
@@ -455,7 +460,11 @@ void FGSCAbilitySystemUtils::RemoveLooseGameplayTagsUnique(UAbilitySystemCompone
 	InASC->RemoveLooseGameplayTags(TagsToRemove);
 	if (bReplicated)
 	{
+#if UE_VERSION_NEWER_THAN(5, 7, -1)
+		InASC->RemoveLooseGameplayTags(TagsToRemove);
+#else
 		InASC->RemoveReplicatedLooseGameplayTags(TagsToRemove);
+#endif
 	}
 }
 

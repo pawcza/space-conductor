@@ -1,34 +1,67 @@
-// Copyright 2021 Mickael Daniel. All Rights Reserved.
+﻿// Copyright 2021-2024 Mickael Daniel. All Rights Reserved.
 
 #pragma once
 
-#include "CoreMinimal.h"
-
+#include "Engine/DeveloperSettings.h"
 #include "GSCDeveloperSettings.generated.h"
 
+class UAttributeSet;
+
 /**
- * General Settings for GAS Companion Plugin.
+ * Developer Settings for GAS Companion, Attributes and AttributeSets related config.
+ *
+ * Upon changing any of the below configuration settings, the `Config/DefaultGame.ini` file will be saved to persist
+ * this setting.
  */
-UCLASS(Config="Game", defaultconfig, meta=(DisplayName="GAS Companion"))
-class GASCOMPANION_API UGSCDeveloperSettings : public UObject
+UCLASS(config=Game, defaultconfig)
+class GASCOMPANION_API UGSCDeveloperSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
 public:
+	/**
+	 * Set this setting to true to hide GSCAttributeSet attributes from appearing in the Gameplay Attributes dropdown,
+	 * namely in Gameplay Effects and K2 nodes like GetFloatAttribute() and their Attribute pin parameter.
+	 */
+	UPROPERTY(config, EditAnywhere, Category = "Attributes", meta = (DisplayName = "Hide GSCAttributeSet Attributes"))
+	bool bHideGSCAttributeSetInDetailsView = false;
+	
+	/**
+	 * True if the GAS Companion module should add combo button and its drop-down menu in the level editor toolbar.
+	 */
+	UPROPERTY(config, EditAnywhere, Category = "Editor", meta = (ConfigRestartRequired = true))
+	bool bEnableEditorToolbarButton = true;
+	
+	/**
+	 * True if the GAS Companion module should add combo button and its drop-down menu in the level editor's status bar at the bottom
+	 */
+	UPROPERTY(config, EditAnywhere, Category = "Editor", meta = (ConfigRestartRequired = true))
+	bool bEnableEditorStatusBarButton = true;
 
-	UGSCDeveloperSettings(const FObjectInitializer& ObjectInitializer);
+	/** Default constructor */
+	UGSCDeveloperSettings();
+
+	static const UGSCDeveloperSettings& Get();
+	static UGSCDeveloperSettings& GetMutable();
 
 	/**
-	 * Turn this on to prevent GAS Companion module to initialize UAbilitySystemGlobals (InitGlobalData) in the plugin StartupModule method.
+	 * The category name for our developer settings
 	 *
-	 * InitGlobalData() might be invoked a bit too early otherwise (with GAS Companion's StartupModule). It is expected that if you set this option to true to use
-	 * an AssetManager subclass where `UAbilitySystemGlobals::Get().InitGlobalData()` is called in `StartInitialLoading``
-	 *
-	 * You'll need to update `Project Settings -> Engine > General Settings > Asset Manager Class` to use your AssetManager subclass.
-	 *
-	 * GAS Companion provides one `GSCAssetManager` and the editor should ask you if you want to update the `Asset Manager Class` to use it if the current Manager class
-	 * is using engine's default one.
+	 * @see GetCategoryName
 	 */
-	UPROPERTY(Config, EditAnywhere, Category = "Ability System", meta=(DisplayName = "Prevent Ability System Global Data Initialization in Startup Module (Recommended)"))
-	bool bPreventGlobalDataInitialization = false;
+	static constexpr const TCHAR* PluginCategoryName = TEXT("GAS Companion");
+	
+	//~ Begin UDeveloperSettings interface
+	virtual FName GetCategoryName() const override;
+#if WITH_EDITOR
+	virtual FText GetSectionText() const override;
+	//~ End UDeveloperSettings interface
+	
+	//~ Begin UObject interface
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	//~ End UObject interface
+
+	/** Adds or remove `HideInDetailsView` class metadata to the passed in UClass. InClass must be a child of UAttributeSet */
+	static void SetHideInDetailsViewMetaData(UClass* InClass, bool bInHideInDetailsView);
+#endif
 };

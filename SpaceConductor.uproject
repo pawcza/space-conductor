@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.3",
+	"EngineAssociation": "5.7",
 	"Category": "",
 	"Description": "",
 	"Plugins": [
@@ -105,6 +105,10 @@
 		{
 			"Name": "GooglePAD",
 			"Enabled": false
+		},
+		{
+			"Name": "LudusAI",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

@@ -49,7 +49,7 @@ struct FGSCMenuItem : TSharedFromThis<FGSCMenuItem>
 
 		AssetToolsModule.Get().CreateUniqueAssetName(DefaultFullPath, TEXT(""), /*out*/ PackageName, /*out*/ AssetName);
 		UBlueprint* Asset = Cast<UBlueprint>(AssetToolsModule.Get().CreateAsset(*AssetName, InSelectedPaths[0], UBlueprint::StaticClass(), BlueprintFactory));
-		EDITOR_LOG(Verbose, TEXT("Create Asset %s with path: %s (name: %s)"), *GetNameSafe(Asset), *InSelectedPaths[0], *AssetName)
+		GSC_EDITOR_LOG(Verbose, TEXT("Create Asset %s with path: %s (name: %s)"), *GetNameSafe(Asset), *InSelectedPaths[0], *AssetName)
 
 		if (Asset)
 		{
@@ -58,7 +58,7 @@ struct FGSCMenuItem : TSharedFromThis<FGSCMenuItem>
 
 			if (CDO && TemplateCDO)
 			{
-				EDITOR_LOG(Verbose, TEXT("Update Gameplay Effect CDO to match template for %s"), *GetNameSafe(CDO))
+				GSC_EDITOR_LOG(Verbose, TEXT("Update Gameplay Effect CDO to match template for %s"), *GetNameSafe(CDO))
 				UGSCTemplate_GameplayEffectDefinition::CopyProperties(CDO, TemplateCDO);
 
 #if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3

@@ -12,6 +12,7 @@
 #include "Components/GSCComboManagerComponent.h"
 #include "Components/GSCCoreComponent.h"
 #include "Engine/GameInstance.h"
+#include "GameFramework/PlayerState.h"
 #include "Runtime/Launch/Resources/Version.h"
 
 void UGSCAbilitySystemComponent::BeginPlay()
@@ -204,8 +205,14 @@ void UGSCAbilitySystemComponent::AbilityLocalInputPressed(const int32 InputID)
 
 					AbilitySpecInputPressed(Spec);
 
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+					// Fixing this up to use the instance activation, but this function should be deprecated as it cannot work with InstancedPerExecution
+					UE_CLOG(Spec.Ability->GetInstancingPolicy() == EGameplayAbilityInstancingPolicy::InstancedPerExecution, LogAbilitySystemCompanion, Warning, TEXT("%hs: %s is InstancedPerExecution. This is unreliable for Input as you may only interact with the latest spawned Instance"), __func__, *GetNameSafe(Spec.Ability));
+					TArray<UGameplayAbility*> Instances = Spec.GetAbilityInstances();
+					const FGameplayAbilityActivationInfo& ActivationInfo = Instances.IsEmpty() ? Spec.ActivationInfo : Instances.Last()->GetCurrentActivationInfoRef();
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
 					// Invoke the InputPressed event. This is not replicated here. If someone is listening, they may replicate the InputPressed event to the server.
-					InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed, Spec.Handle, Spec.ActivationInfo.GetActivationPredictionKey());
+					InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed, Spec.Handle, ActivationInfo.GetActivationPredictionKey());					
 				}
 				else
 				{
@@ -366,12 +373,13 @@ bool UGSCAbilitySystemComponent::ShouldGrantAbility(const TSubclassOf<UGameplayA
 bool UGSCAbilitySystemComponent::ShouldGrantAbilitySet(const UGSCAbilitySet* InAbilitySet) const
 {
 	check(InAbilitySet);
-	
-	// Reset thingy for Ability Sets ? (at the Ability Set DataAsset lvl if implemented)
-	// if (bResetAbilitiesOnSpawn)
-	// {
-	// 	return true;
-	// }
+
+	// Forcefully re-grant ability sets in case owner is PlayerState, this is to ensure input binding still works after a respawn
+	// ASC living on Pawns that don't have this problem.
+	if (IsPlayerStateOwner())
+	{
+		return true;
+	}
 
 	// ReSharper disable once CppUseStructuredBinding
 	for (const FGSCAbilitySetHandle& Handle : AddedAbilitySets)
@@ -383,6 +391,12 @@ bool UGSCAbilitySystemComponent::ShouldGrantAbilitySet(const UGSCAbilitySet* InA
 	}
 	
 	return true;
+}
+
+bool UGSCAbilitySystemComponent::IsPlayerStateOwner() const
+{
+	const AActor* LocalOwnerActor = GetOwnerActor();
+	return LocalOwnerActor && LocalOwnerActor->IsA<APlayerState>();
 }
 
 void UGSCAbilitySystemComponent::GrantDefaultAbilitiesAndAttributes(AActor* InOwnerActor, AActor* InAvatarActor)
@@ -582,7 +596,7 @@ void UGSCAbilitySystemComponent::GrantStartupEffects()
 
 	AddedEffects.Empty(GrantedEffects.Num());
 
-	for (const TSubclassOf<UGameplayEffect> GameplayEffect : GrantedEffects)
+	for (const TSubclassOf<UGameplayEffect>& GameplayEffect : GrantedEffects)
 	{
 		FGameplayEffectSpecHandle NewHandle = MakeOutgoingSpec(GameplayEffect, 1, EffectContext);
 		if (NewHandle.IsValid())

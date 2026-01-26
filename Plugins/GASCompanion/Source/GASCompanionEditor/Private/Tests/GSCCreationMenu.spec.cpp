@@ -7,8 +7,16 @@
 #include "CreationMenu/GSCGameplayEffectCreationMenu.h"
 #include "HAL/FileManager.h"
 #include "Misc/AutomationTest.h"
+#include "Misc/EngineVersionComparison.h"
 
-BEGIN_DEFINE_SPEC(FGSCCreationMenuSpec, "GASCompanion.Editor.GSCCreationMenu", EAutomationTestFlags::ProductFilter | EAutomationTestFlags::ApplicationContextMask)
+#if UE_VERSION_OLDER_THAN(5, 5, 0)
+
+// 5.4.x and down
+inline constexpr uint8 EAutomationTestFlags_ApplicationContextMask = EAutomationTestFlags::EditorContext | EAutomationTestFlags::ClientContext | EAutomationTestFlags::ServerContext | EAutomationTestFlags::CommandletContext;
+
+#endif
+
+BEGIN_DEFINE_SPEC(FGSCCreationMenuSpec, "GASCompanion.Editor.GSCCreationMenu", EAutomationTestFlags::ProductFilter | EAutomationTestFlags_ApplicationContextMask)
 
 	const UGSCGameplayEffectCreationMenu* EffectCreationMenu = nullptr;
 

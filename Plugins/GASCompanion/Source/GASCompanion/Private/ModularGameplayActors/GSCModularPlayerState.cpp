@@ -2,10 +2,11 @@
 
 #include "ModularGameplayActors/GSCModularPlayerState.h"
 
+#include "GSCLog.h"
 #include "Abilities/GSCAbilitySystemComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Components/PlayerStateComponent.h"
-#include "GSCLog.h"
+#include "Misc/EngineVersionComparison.h"
 
 AGSCModularPlayerState::AGSCModularPlayerState(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -27,7 +28,11 @@ AGSCModularPlayerState::AGSCModularPlayerState(const FObjectInitializer& ObjectI
 	//
 	// Default is very low for PlayerStates and introduces perceived lag in the ability system.
 	// 100 is probably way too high for a shipping game, you can adjust to fit your needs.
-	NetUpdateFrequency = 10.0f;
+#if UE_VERSION_OLDER_THAN(5, 5, 0)
+	NetUpdateFrequency = 10.f;
+#else
+	SetNetUpdateFrequency(10.f);
+#endif
 }
 
 void AGSCModularPlayerState::PreInitializeComponents()

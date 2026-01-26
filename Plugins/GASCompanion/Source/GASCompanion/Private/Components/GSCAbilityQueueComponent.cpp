@@ -2,11 +2,11 @@
 
 #include "Components/GSCAbilityQueueComponent.h"
 
-#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "GSCDelegates.h"
 #include "GSCLog.h"
 #include "Abilities/GSCGameplayAbility.h"
+#include "AbilitySystemGlobals.h"
 #include "GameFramework/Pawn.h"
 
 // Sets default values for this component's properties
@@ -20,29 +20,12 @@ UGSCAbilityQueueComponent::UGSCAbilityQueueComponent()
 	SetIsReplicatedByDefault(true);
 }
 
-// Called when the game starts
 void UGSCAbilityQueueComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	SetupOwner();
-}
-
-void UGSCAbilityQueueComponent::SetupOwner()
-{
-	if(!GetOwner())
-	{
-		return;
-	}
-
-	OwnerPawn = Cast<APawn>(GetOwner());
-	if(!OwnerPawn)
-	{
-		return;
-	}
-
-	OwnerAbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerPawn);
+	const UAbilitySystemComponent* ASC = GetOwnerAbilitySystemComponent();
+	GSC_LOG(Verbose, TEXT("UGSCAbilityQueueComponent:BeginPlay() ASC: %s"), *GetNameSafe(ASC));
 }
 
 void UGSCAbilityQueueComponent::OpenAbilityQueue()
@@ -62,11 +45,7 @@ void UGSCAbilityQueueComponent::CloseAbilityQueue()
 		return;
 	}
 
-	if (OwnerPawn)
-	{
-		GSC_LOG(Verbose, TEXT("UGSCAbilityQueueComponent:CloseAbilityQueue() Closing Ability Queue for %s"), *OwnerPawn->GetName())
-	}
-
+	GSC_LOG(Verbose, TEXT("UGSCAbilityQueueComponent:CloseAbilityQueue() Closing Ability Queue for %s"), *GetNameSafe(GetOwner()));
 	bAbilityQueueOpened = false;
 }
 
@@ -159,9 +138,9 @@ void UGSCAbilityQueueComponent::OnAbilityEnded(const UGameplayAbility* InAbility
 				ResetAbilityQueueState();
 
 				GSC_LOG(Log, TEXT("UGSCAbilityQueueComponent::OnAbilityEnded() %s is within Allowed Abilties, try activate [AbilityQueueSystem]"), *AbilityToActivate->GetName())
-				if (OwnerAbilitySystemComponent)
+				if (UAbilitySystemComponent* ASC = GetOwnerAbilitySystemComponent())
 				{
-					OwnerAbilitySystemComponent->TryActivateAbilityByClass(AbilityToActivate->GetClass());
+					ASC->TryActivateAbilityByClass(AbilityToActivate->GetClass());
 				}
 			}
 			else
@@ -206,4 +185,9 @@ void UGSCAbilityQueueComponent::ResetAbilityQueueState()
 void UGSCAbilityQueueComponent::UpdateDebugWidgetAllowedAbilities()
 {
 	FGSCDelegates::OnUpdateAllowedAbilities.Broadcast(QueuedAllowedAbilities);
+}
+
+UAbilitySystemComponent* UGSCAbilityQueueComponent::GetOwnerAbilitySystemComponent() const
+{
+	return UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner());
 }

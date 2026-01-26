@@ -10,6 +10,8 @@
 #include "Modules/ModuleManager.h"
 
 class IAssetTypeActions;
+class SNotificationItem;
+struct FToolMenuSection;
 
 class FGASCompanionEditorModule : public IModuleInterface
 {
@@ -17,13 +19,6 @@ public:
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-
-	/**
-	* Opens a dialog to add code files or blueprints to the current project.
-	*
-	* @param	Config			Configuration options for the dialog
-	*/
-	static void OpenAddToProjectDialog(const FAddToProjectConfig& Config = FAddToProjectConfig());
 
 	EAssetTypeCategories::Type GetAssetTypeCategory() const;
 
@@ -47,14 +42,15 @@ public:
 	}
 
 private:
+	/** The notification toast that a check-in is recommended */
+	TWeakPtr<SNotificationItem> AssetManagerNotification;
 
-	FName SettingsContainerName = FName(TEXT("Project"));
-	FName SettingsCategoryName = FName(TEXT("GAS Companion"));
-	FName SettingsGameplayEffectsSectionName = FName(TEXT("Gameplay Effect Definitions"));
-	FName SettingsGameplayAbilitiesSectionName = FName(TEXT("Gameplay Abilities Definitions"));
-	FName SettingsAttributeSetSectionName = FName(TEXT("GASCompanion_AbilitySystemGlobals"));
+	static constexpr const TCHAR* SettingsContainerName = TEXT("Project");
+	static constexpr const TCHAR* SettingsCategoryName = TEXT("GAS Companion");
+	static constexpr const TCHAR* SettingsGameplayEffectsSectionName = TEXT("Effects Definitions");
+	static constexpr const TCHAR* SettingsGameplayAbilitiesSectionName = TEXT("Abilities Definitions");
 
-	TSharedPtr<class FUICommandList> PluginCommands;
+	TSharedPtr<FUICommandList> PluginCommands;
 	EAssetTypeCategories::Type AssetTypeCategory = EAssetTypeCategories::None;
 	FDelegateHandle MapChangedHandle;
 
@@ -63,8 +59,15 @@ private:
 	/** All registered customization. Cached here so that we can unregister during shutdown */
     TArray<FName> RegisteredClassCustomizations;
 
+	void HandleAssetManagerDeprecationMessage();
+	void UpdateAssetManagerClass() const;
+	void OnOpenEngineSettingsClicked() const;
+	void OnNotificationDismissClicked() const;
+
 	void RegisterMenus();
-	void RegisterComboMenus() const;
+	void AddComboButtonToMenu(FToolMenuSection& InMenuSection) const;
+	static void RegisterComboMenus();
+	static void BuildMenuSections(UToolMenu* InMenu);
 
 	static void RegisterCommands();
 	static void UnregisterCommands();

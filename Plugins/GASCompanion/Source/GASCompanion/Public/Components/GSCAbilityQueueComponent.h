@@ -25,18 +25,11 @@ class GASCOMPANION_API UGSCAbilityQueueComponent : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UGSCAbilityQueueComponent();
-
-	UPROPERTY(BlueprintReadOnly, Category = "GAS Companion|Components")
-	TObjectPtr<APawn> OwnerPawn;
-
-	UPROPERTY(BlueprintReadOnly, Category = "GAS Companion|Components")
-	TObjectPtr<UAbilitySystemComponent> OwnerAbilitySystemComponent;
-
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GAS Companion|Ability Queue System")
 	bool bAbilityQueueEnabled = true;
 
-	/** Setup GetOwner to character and sets references for ability system component and the owner itself. */
-	void SetupOwner();
+	virtual void BeginPlay() override;
 
     /**
      * Set the bAbilityQueue to true and opens the ability queue system for activation
@@ -82,11 +75,6 @@ public:
 	void OnAbilityFailed(const UGameplayAbility* Ability, const FGameplayTagContainer& ReasonTags);
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-	/** Ability Queue System */
-
 	bool bAbilityQueueOpened = false;
 	bool bAllowAllAbilitiesForAbilityQueue = false;
 
@@ -104,4 +92,6 @@ protected:
 	* Notify Debug Ability Queue Widget by updating its allowed abilities
 	*/
 	virtual void UpdateDebugWidgetAllowedAbilities();
+
+	UAbilitySystemComponent* GetOwnerAbilitySystemComponent() const;
 };

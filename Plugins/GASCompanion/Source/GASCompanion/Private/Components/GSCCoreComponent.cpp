@@ -7,7 +7,6 @@
 #include "AbilitySystemComponent.h"
 #include "Abilities/GSCGameplayAbility.h"
 #include "Abilities/Attributes/GSCAttributeSet.h"
-#include "Core/Settings/GSCDeveloperSettings.h"
 #include "GameFramework/Character.h"
 #include "GSCLog.h"
 
@@ -65,7 +64,7 @@ void UGSCCoreComponent::RegisterAbilitySystemDelegates(UAbilitySystemComponent* 
 		return;
 	}
 	
-	// Make sure to shutdown delegates previously registered, if RegisterAbilitySystemDelegates is called more than once (likely from AbilityActorInfo)
+	// Make sure to shut down delegates previously registered, if RegisterAbilitySystemDelegates is called more than once (likely from AbilityActorInfo)
 	ShutdownAbilitySystemDelegates(ASC);
 
 	TArray<FGameplayAttribute> Attributes;
@@ -232,7 +231,7 @@ float UGSCCoreComponent::GetHealth() const
 		return 0.0f;
 	}
 
-	return GetAttributeValue(UGSCAttributeSet::GetHealthAttribute());
+	return GetCurrentAttributeValue(UGSCAttributeSet::GetHealthAttribute());
 }
 
 float UGSCCoreComponent::GetMaxHealth() const
@@ -242,7 +241,7 @@ float UGSCCoreComponent::GetMaxHealth() const
 		return 0.0f;
 	}
 
-	return GetAttributeValue(UGSCAttributeSet::GetMaxHealthAttribute());
+	return GetCurrentAttributeValue(UGSCAttributeSet::GetMaxHealthAttribute());
 }
 
 float UGSCCoreComponent::GetStamina() const
@@ -252,7 +251,7 @@ float UGSCCoreComponent::GetStamina() const
 		return 0.0f;
 	}
 
-	return GetAttributeValue(UGSCAttributeSet::GetStaminaAttribute());
+	return GetCurrentAttributeValue(UGSCAttributeSet::GetStaminaAttribute());
 }
 
 float UGSCCoreComponent::GetMaxStamina() const
@@ -262,7 +261,7 @@ float UGSCCoreComponent::GetMaxStamina() const
 		return 0.0f;
 	}
 
-	return GetAttributeValue(UGSCAttributeSet::GetMaxStaminaAttribute());
+	return GetCurrentAttributeValue(UGSCAttributeSet::GetMaxStaminaAttribute());
 }
 
 float UGSCCoreComponent::GetMana() const
@@ -272,7 +271,7 @@ float UGSCCoreComponent::GetMana() const
 		return 0.0f;
 	}
 
-	return GetAttributeValue(UGSCAttributeSet::GetManaAttribute());
+	return GetCurrentAttributeValue(UGSCAttributeSet::GetManaAttribute());
 }
 
 float UGSCCoreComponent::GetMaxMana() const
@@ -282,23 +281,36 @@ float UGSCCoreComponent::GetMaxMana() const
 		return 0.0f;
 	}
 
-	return GetAttributeValue(UGSCAttributeSet::GetMaxManaAttribute());
+	return GetCurrentAttributeValue(UGSCAttributeSet::GetMaxManaAttribute());
 }
 
 float UGSCCoreComponent::GetAttributeValue(const FGameplayAttribute Attribute) const
 {
 	if (!OwnerAbilitySystemComponent)
 	{
-		GSC_LOG(Warning, TEXT("GetAttributeValue() The owner AbilitySystemComponent seems to be invalid. GetAttributeValue() will return 0.f."))
+		GSC_WLOG(Error, TEXT("The owner AbilitySystemComponent seems to be invalid. Will return 0.f."))
 		return 0.0f;
+	}
+
+	if (!Attribute.IsValid())
+	{
+		GSC_WLOG(Error, TEXT("Passed in Attribute is invalid (None). Will return 0.f."))
+		return 0.f;
 	}
 
 	if (!OwnerAbilitySystemComponent->HasAttributeSetForAttribute(Attribute))
 	{
-		const UObject* Owner = Cast<UObject>(this);
-		const FString OwnerName = OwnerActor ? OwnerActor->GetName() : Owner->GetName();
-		GSC_LOG(Warning, TEXT("GetAttributeValue() Attribute %s doesn't seem to be part of the AttributeSet attached to %s"), *Attribute.GetName(), *OwnerName)
-		return 0.0f;
+		const UClass* AttributeSet = Attribute.GetAttributeSetClass();
+		GSC_WLOG(
+			Error,
+			TEXT("Trying to get value of attribute [%s.%s]. %s doesn't seem to be granted to %s. Returning 0.f"),
+			*GetNameSafe(AttributeSet),
+			*Attribute.GetName(),
+			*GetNameSafe(AttributeSet),
+			*GetNameSafe(OwnerAbilitySystemComponent)
+		);
+
+		return 0.f;
 	}
 
 	return OwnerAbilitySystemComponent->GetNumericAttributeBase(Attribute);
@@ -308,14 +320,27 @@ float UGSCCoreComponent::GetCurrentAttributeValue(const FGameplayAttribute Attri
 {
 	if (!OwnerAbilitySystemComponent)
 	{
+		GSC_WLOG(Error, TEXT("The owner AbilitySystemComponent seems to be invalid. Will return 0.f."))
 		return 0.0f;
+	}
+	
+	if (!Attribute.IsValid())
+	{
+		GSC_WLOG(Error, TEXT("Passed in Attribute is invalid (None). Will return 0.f."))
+		return 0.f;
 	}
 
 	if (!OwnerAbilitySystemComponent->HasAttributeSetForAttribute(Attribute))
 	{
-		const UObject* Owner = Cast<UObject>(this);
-		const FString OwnerName = OwnerActor ? OwnerActor->GetName() : Owner->GetName();
-		GSC_LOG(Warning, TEXT("GetCurrentAttributeValue() Attribute %s doesn't seem to be part of the AttributeSet attached to %s"), *Attribute.GetName(), *OwnerName)
+		const UClass* AttributeSet = Attribute.GetAttributeSetClass();
+		GSC_WLOG(
+			Error,
+			TEXT("Trying to get value of attribute [%s.%s]. %s doesn't seem to be granted to %s. Returning 0.f"),
+			*GetNameSafe(AttributeSet),
+			*Attribute.GetName(),
+			*GetNameSafe(AttributeSet),
+			*GetNameSafe(OwnerAbilitySystemComponent)
+		);
 		return 0.0f;
 	}
 
@@ -660,8 +685,15 @@ void UGSCCoreComponent::OnActiveGameplayEffectAdded(UAbilitySystemComponent* Tar
 
 	OnGameplayEffectAdded.Broadcast(AssetTags, GrantedTags, ActiveHandle);
 
-	OwnerAbilitySystemComponent->OnGameplayEffectStackChangeDelegate(ActiveHandle)->AddUObject(this, &UGSCCoreComponent::OnActiveGameplayEffectStackChanged);
-	OwnerAbilitySystemComponent->OnGameplayEffectTimeChangeDelegate(ActiveHandle)->AddUObject(this, &UGSCCoreComponent::OnActiveGameplayEffectTimeChanged);
+	if (FOnActiveGameplayEffectStackChange* Delegate = OwnerAbilitySystemComponent->OnGameplayEffectStackChangeDelegate(ActiveHandle))
+	{
+		Delegate->AddUObject(this, &UGSCCoreComponent::OnActiveGameplayEffectStackChanged);
+	}
+
+	if (FOnActiveGameplayEffectTimeChange* Delegate = OwnerAbilitySystemComponent->OnGameplayEffectTimeChangeDelegate(ActiveHandle))
+	{
+		Delegate->AddUObject(this, &UGSCCoreComponent::OnActiveGameplayEffectTimeChanged);
+	}
 
 	// Store active handles to clear out bound delegates when shutting down listeners
 	GameplayEffectAddedHandles.AddUnique(ActiveHandle);
@@ -819,7 +851,7 @@ void UGSCCoreComponent::HandleCooldownOnAbilityCommit(UGameplayAbility* Activate
 	// Register delegate to monitor any change to cooldown gameplay tag to be able to figure out when a cooldown expires
 	TArray<FGameplayTag> GameplayTags;
 	CooldownTags->GetGameplayTagArray(GameplayTags);
-	for (const FGameplayTag GameplayTag : GameplayTags)
+	for (const FGameplayTag& GameplayTag : GameplayTags)
 	{
 		OwnerAbilitySystemComponent->RegisterGameplayTagEvent(GameplayTag)
 			.AddUObject(this, &UGSCCoreComponent::OnCooldownGameplayTagChanged, AbilitySpecHandle, Duration);

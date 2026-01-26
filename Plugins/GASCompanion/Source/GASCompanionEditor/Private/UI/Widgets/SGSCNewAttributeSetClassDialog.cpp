@@ -660,7 +660,7 @@ bool SGSCNewAttributeSetClassDialog::CanFinish() const
 
 void SGSCNewAttributeSetClassDialog::FinishClicked()
 {
-	EDITOR_LOG(Log, TEXT("Attribute Wizard FinishClicked"));
+	GSC_EDITOR_LOG(Log, TEXT("Attribute Wizard FinishClicked"));
 
 	// Track the selected module name so we can default to this next time
 	LastSelectedModuleName = SelectedModuleInfo->ModuleName;
@@ -676,7 +676,7 @@ void SGSCNewAttributeSetClassDialog::FinishClicked()
 	}
 	else
 	{
-		EDITOR_LOG(Error, TEXT("Error adding code to project: %s"), *OutFailReason.ToString())
+		GSC_EDITOR_LOG(Error, TEXT("Error adding code to project: %s"), *OutFailReason.ToString())
 	}
 }
 
@@ -918,7 +918,7 @@ void SGSCNewAttributeSetClassDialog::CloseContainingWindow()
 
 GameProjectUtils::EAddCodeToProjectResult SGSCNewAttributeSetClassDialog::AddClassToProject(FText& OutFailReason)
 {
-	EDITOR_LOG(Log, TEXT("AddCodeToProject()"))
+	GSC_EDITOR_LOG(Log, TEXT("AddCodeToProject()"))
 
 	FString HeaderFilePath;
 	FString CppFilePath;
@@ -926,7 +926,7 @@ GameProjectUtils::EAddCodeToProjectResult SGSCNewAttributeSetClassDialog::AddCla
 
 	if (!FGSCTemplateProjectUtils::PrepareTemplate(ParentClassInfo, TemplateFailReason))
 	{
-		EDITOR_LOG(Error, TEXT("PrepareTemplate failed: %s"), *TemplateFailReason.ToString())
+		GSC_EDITOR_LOG(Error, TEXT("PrepareTemplate failed: %s"), *TemplateFailReason.ToString())
 
 		// @todo show fail reason in error label
 		// Failed to add code
@@ -941,7 +941,7 @@ GameProjectUtils::EAddCodeToProjectResult SGSCNewAttributeSetClassDialog::AddCla
 
 	if (!FGSCTemplateProjectUtils::ResetTemplate(TemplateFailReason))
 	{
-		EDITOR_LOG(Error, TEXT("ResetTemplate failed: %s"), *TemplateFailReason.ToString())
+		GSC_EDITOR_LOG(Error, TEXT("ResetTemplate failed: %s"), *TemplateFailReason.ToString())
 
 		// Failed to reset template, notify users (and figure out what to do next)
 		const FNotificationInfo Notification(
@@ -955,7 +955,7 @@ GameProjectUtils::EAddCodeToProjectResult SGSCNewAttributeSetClassDialog::AddCla
 
 	if (AddCodeResult == GameProjectUtils::EAddCodeToProjectResult::Succeeded)
 	{
-		EDITOR_LOG(Log, TEXT("AddCodeToProject() Succeeded"))
+		GSC_EDITOR_LOG(Log, TEXT("AddCodeToProject() Succeeded"))
 		OnAddedToProject.ExecuteIfBound(NewClassName, NewClassPath, SelectedModuleInfo->ModuleName);
 
 		// Reload current project to take into account any new state
@@ -1035,7 +1035,7 @@ GameProjectUtils::EAddCodeToProjectResult SGSCNewAttributeSetClassDialog::AddCla
 	}
 	else if (AddCodeResult == GameProjectUtils::EAddCodeToProjectResult::FailedToHotReload)
 	{
-		EDITOR_LOG(Log, TEXT("AddCodeToProject() FailedToHotReload %s"), *OutFailReason.ToString())
+		GSC_EDITOR_LOG(Log, TEXT("AddCodeToProject() FailedToHotReload %s"), *OutFailReason.ToString())
 		OnAddedToProject.ExecuteIfBound(NewClassName, NewClassPath, SelectedModuleInfo->ModuleName);
 
 		// Prevent periodic validity checks. This is to prevent a brief error message about the class already existing while you are exiting.
@@ -1056,7 +1056,7 @@ GameProjectUtils::EAddCodeToProjectResult SGSCNewAttributeSetClassDialog::AddCla
 	}
 	else
 	{
-		EDITOR_LOG(Error, TEXT("AddAttributeCodeToProject() FailedToAddCode %s"), *OutFailReason.ToString())
+		GSC_EDITOR_LOG(Error, TEXT("AddAttributeCodeToProject() FailedToAddCode %s"), *OutFailReason.ToString())
 
 		// @todo show fail reason in error label
 		// Failed to add code

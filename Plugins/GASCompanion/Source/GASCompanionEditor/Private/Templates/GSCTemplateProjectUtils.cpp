@@ -18,6 +18,7 @@
 #include "GameFramework/Character.h"
 #include "HAL/PlatformFileManager.h"
 #include "Interfaces/IProjectManager.h"
+#include "Misc/EngineVersionComparison.h"
 #include "Misc/FeedbackContext.h"
 #include "Misc/FileHelper.h"
 #include "Misc/HotReloadInterface.h"
@@ -300,7 +301,7 @@ bool FGSCTemplateProjectUtils::GenerateBasicSourceCode(const FString& NewProject
 		PrivateDependencyModuleNames.Add(TEXT("GameplayTasks"));
 		PrivateDependencyModuleNames.Add(TEXT("GameplayTags"));
 
-		EDITOR_LOG(Display, TEXT("Generate Build.cs file %s (Game Module: %s)"), *NewBuildFilename, *GameModulePath);
+		GSC_EDITOR_LOG(Display, TEXT("Generate Build.cs file %s (Game Module: %s)"), *NewBuildFilename, *GameModulePath);
 		if (GameProjectUtils::GenerateGameModuleBuildFile(NewBuildFilename, NewProjectName, PublicDependencyModuleNames, PrivateDependencyModuleNames, OutFailReason))
 		{
 			OutGeneratedStartupModuleNames.Add(NewProjectName);
@@ -393,7 +394,7 @@ bool FGSCTemplateProjectUtils::PrepareTemplate(const FNewClassInfo ParentClassIn
 			}
 
 			// Alter template here
-			EDITOR_LOG(Log, TEXT("PrepareTemplate() Alter template here"))
+			GSC_EDITOR_LOG(Log, TEXT("PrepareTemplate() Alter template here"))
 
 			auto const& Settings = UGSCAttributesGenSettings::Get()->Settings;
 			if (!UGSCAttributeSetClassTemplate::PrepareHeaderTemplate(Settings.Attributes, HeaderTemplate, OutFailReason))
@@ -414,7 +415,7 @@ bool FGSCTemplateProjectUtils::PrepareTemplate(const FNewClassInfo ParentClassIn
 bool FGSCTemplateProjectUtils::ResetTemplate(FText& OutFailReason)
 {
 	// Reset template here
-	EDITOR_LOG(Log, TEXT("ResetTemplate() Reset template here"))
+	GSC_EDITOR_LOG(Log, TEXT("ResetTemplate() Reset template here"))
 	if (!UGSCAttributeSetClassTemplate::ResetTemplates(OutFailReason))
 	{
 		return false;
@@ -1064,11 +1065,19 @@ FString FGSCTemplateProjectUtils::GetCleanClassName(FNewClassInfo ClassInfo, con
 			// if our class ends with either Widget or WidgetStyle, we need to strip those out to avoid silly looking duplicates
 			if(CleanClassName.EndsWith(TEXT("Style")))
 			{
+#if UE_VERSION_OLDER_THAN(5, 5, 0)
 				CleanClassName.LeftChopInline(5, false); // 5 for "Style"
+#else
+				CleanClassName.LeftChopInline(5, EAllowShrinking::No); // 5 for "Style"
+#endif
 			}
 			if(CleanClassName.EndsWith(TEXT("Widget")))
 			{
+#if UE_VERSION_OLDER_THAN(5, 5, 0)
 				CleanClassName.LeftChopInline(6, false); // 6 for "Widget"
+#else
+				CleanClassName.LeftChopInline(6, EAllowShrinking::No); // 6 for "Widget"
+#endif
 			}
 		}
 		break;

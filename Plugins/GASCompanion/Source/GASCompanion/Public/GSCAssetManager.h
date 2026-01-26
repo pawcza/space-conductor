@@ -6,6 +6,8 @@
 #include "Engine/AssetManager.h"
 #include "GSCAssetManager.generated.h"
 
+class UE_DEPRECATED(5.5, "UGSCAssetManager has been deprecated. Please use UAssetManager instead.") UGSCAssetManager;
+
 /**
  * Child of UAssetManager with the primary purpose of initializing UAbilitySystemGlobals GlobalData
  */

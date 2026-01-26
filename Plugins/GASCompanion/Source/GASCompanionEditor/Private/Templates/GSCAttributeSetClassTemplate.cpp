@@ -45,13 +45,13 @@ bool UGSCAttributeSetClassTemplate::PrepareHeaderTemplate(TArray<FGSCAttributeDe
 	const bool bReplaceDone = ReplaceAttributePlaceholder(Attributes, TemplateText, OutFailReason);
 	if (!bReplaceDone)
 	{
-		EDITOR_LOG(Error, TEXT("ClassTemplate:PrepareHeaderTemplate() Error replacing attribute placeholders: %s"), *OutFailReason.ToString())
+		GSC_EDITOR_LOG(Error, TEXT("ClassTemplate:PrepareHeaderTemplate() Error replacing attribute placeholders: %s"), *OutFailReason.ToString())
 		return false;
 	}
 
 	const FString OutputFilename = GetPluginTemplateDirectory() / TEXT("AttributeSetClass.h.template");
 
-	EDITOR_LOG(Display, TEXT("ClassTemplate:PrepareHeaderTemplate() Write Output to: %s"), *OutputFilename)
+	GSC_EDITOR_LOG(Display, TEXT("ClassTemplate:PrepareHeaderTemplate() Write Output to: %s"), *OutputFilename)
 	return WriteOutputFile(OutputFilename, TemplateText, OutFailReason);
 }
 
@@ -60,13 +60,13 @@ bool UGSCAttributeSetClassTemplate::PrepareSourceTemplate(TArray<FGSCAttributeDe
 	const bool bReplaceDone = ReplaceAttributePlaceholder(Attributes, TemplateText, OutFailReason);
 	if (!bReplaceDone)
 	{
-		EDITOR_LOG(Error, TEXT("ClassTemplate:PrepareSourceTemplate() Error replacing attribute placeholders: %s"), *OutFailReason.ToString())
+		GSC_EDITOR_LOG(Error, TEXT("ClassTemplate:PrepareSourceTemplate() Error replacing attribute placeholders: %s"), *OutFailReason.ToString())
 		return false;
 	}
 
 	const FString OutputFilename = GetPluginTemplateDirectory() / TEXT("AttributeSetClass.cpp.template");
 
-	EDITOR_LOG(Display, TEXT("ClassTemplate:PrepareSourceTemplate() Write Output to: %s"), *OutputFilename)
+	GSC_EDITOR_LOG(Display, TEXT("ClassTemplate:PrepareSourceTemplate() Write Output to: %s"), *OutputFilename)
 	return WriteOutputFile(OutputFilename, TemplateText, OutFailReason);
 }
 
@@ -97,7 +97,7 @@ bool UGSCAttributeSetClassTemplate::ResetTemplates(FText& OutFailReason)
 
 bool UGSCAttributeSetClassTemplate::ReplaceAttributePlaceholder(const TArray<FGSCAttributeDefinition> Attributes, FString& OutTemplateText, FText& OutFailReason)
 {
-	EDITOR_LOG(Verbose, TEXT("ClassTemplate:ReplaceAttributePlaceholder() Alter template here"))
+	GSC_EDITOR_LOG(Verbose, TEXT("ClassTemplate:ReplaceAttributePlaceholder() Alter template here"))
 
 	FString AttributeDeclarationTemplate;
 	FString AttributeOnRepDeclarationTemplate;
@@ -136,7 +136,7 @@ FString UGSCAttributeSetClassTemplate::MakeAttributesDeclaration(TArray<FGSCAttr
 	FString Template;
 	if (!ReadTemplateFile(TEXT("FGamplayAttributeDeclaration.template"), Template, FailReason))
 	{
-		EDITOR_LOG(Error, TEXT("ClassTemplate:MakeAttributesDeclaration() Error reading template: %s"), *FailReason.ToString())
+		GSC_EDITOR_LOG(Error, TEXT("ClassTemplate:MakeAttributesDeclaration() Error reading template: %s"), *FailReason.ToString())
 		return FString();
 	}
 
@@ -158,7 +158,7 @@ FString UGSCAttributeSetClassTemplate::MakeAttributesOnRepDeclaration(TArray<FGS
 	FString Template;
 	if (!ReadTemplateFile(TEXT("FGameplayAttribute_OnRep_Declaration.template"), Template, FailReason))
 	{
-		EDITOR_LOG(Error, TEXT("ClassTemplate:MakeAttributesOnRepDeclaration() Error reading template: %s"), *FailReason.ToString())
+		GSC_EDITOR_LOG(Error, TEXT("ClassTemplate:MakeAttributesOnRepDeclaration() Error reading template: %s"), *FailReason.ToString())
 		return FString();
 	}
 
@@ -178,7 +178,7 @@ FString UGSCAttributeSetClassTemplate::MakeAttributesDoRepLifetimeDefinition(TAr
 	FString Template;
 	if (!ReadTemplateFile(TEXT("FGameplayAttribute_DOREPLIFETIME_Definition.template"), Template, FailReason))
 	{
-		EDITOR_LOG(Error, TEXT("ClassTemplate:MakeAttributesDoRepLifetimeDefinition() Error reading template: %s"), *FailReason.ToString())
+		GSC_EDITOR_LOG(Error, TEXT("ClassTemplate:MakeAttributesDoRepLifetimeDefinition() Error reading template: %s"), *FailReason.ToString())
 		return FString();
 	}
 
@@ -198,7 +198,7 @@ FString UGSCAttributeSetClassTemplate::MakeAttributesOnRepDefinition(TArray<FGSC
 	FString Template;
 	if (!ReadTemplateFile(TEXT("FGameplayAttribute_OnRep_Definition.template"), Template, FailReason))
 	{
-		EDITOR_LOG(Error, TEXT("ClassTemplate:MakeAttributesOnRepDefinition() Error reading template: %s"), *FailReason.ToString())
+		GSC_EDITOR_LOG(Error, TEXT("ClassTemplate:MakeAttributesOnRepDefinition() Error reading template: %s"), *FailReason.ToString())
 		return FString();
 	}
 

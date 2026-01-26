@@ -20,8 +20,8 @@ public:
 protected:
 	TSharedPtr<SNotificationItem> SettingsNotificationItem;
 
-	bool HandleSettingsSaved();
-	void UpdateAssetManagerClass();
-	
-	void OnPostEngineInit();
+	static void OnPostEngineInit();
+
+	/** On engine start, set up the HideInDetailsView metadata for GSCAttributeSet class, depending on saved config */
+	static void HandleAttributesDeveloperSettings();
 };

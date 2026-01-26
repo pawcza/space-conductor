@@ -109,6 +109,44 @@ public:
 	/** Called on ability end */
 	void AbilityEnded(UGameplayAbility* Ability);
 
+	/**
+	 * In engine, Commit Ability does the commit code path before notifying for ability commit, whereas
+	 * K2_CommitAbilityCooldown and K2_CommitAbilityCost do notify for ability commit before trying to commit the
+	 * cooldown or cost.
+	 *
+	 * This results in effects not being applied when the CommitAbility delegates are triggered, and methods such as
+	 * UGameplayAbility::GetCooldownTimeRemaining() returning a 0 value.
+	 *
+	 * This override is only there to ensure the notification and calling of delegates happen **after** commit of
+	 * cost or cooldown, like K2_CommitAbility and CommitAbility are doing.
+	 *
+	 * This ensures CommitAbilityCooldown and CommitAbilityCost when called in Blueprints, behave the same as
+	 * CommitAbility regarding any code that triggers on commit-related delegates (OnCommitAbility, OnCooldownStart,
+	 * OnCooldownEnd, etc. on both UGSCCoreComponent and UGSCUserWidget)
+	 *
+	 * The other option would be to propose this change upstream in a PR.
+	 */
+	virtual bool K2_CommitAbilityCooldown(bool bBroadcastCommitEvent, bool bForceCooldown) override;
+	
+	/**
+	 * In engine, Commit Ability does the commit code path before notifying for ability commit, whereas
+	 * K2_CommitAbilityCooldown and K2_CommitAbilityCost do notify for ability commit before trying to commit the
+	 * cooldown or cost.
+	 *
+	 * This results in effects not being applied when the CommitAbility delegates are triggered, and methods such as
+	 * UGameplayAbility::GetCooldownTimeRemaining() returning a 0 value.
+	 *
+	 * This override is only there to ensure the notification and calling of delegates happen **after** commit of
+	 * cost or cooldown, like K2_CommitAbility and CommitAbility are doing.
+	 *
+	 * This ensures CommitAbilityCooldown and CommitAbilityCost when called in Blueprints, behave the same as
+	 * CommitAbility regarding any code that triggers on commit-related delegates (OnCommitAbility, OnCooldownStart,
+	 * OnCooldownEnd, etc. on both UGSCCoreComponent and UGSCUserWidget)
+	 *
+	 * The other option would be to propose this change upstream in a PR.
+	 */
+	virtual bool K2_CommitAbilityCost(bool bBroadcastCommitEvent = false) override;
+
 protected:
 
 	//~Begin UGameplayAbility interface

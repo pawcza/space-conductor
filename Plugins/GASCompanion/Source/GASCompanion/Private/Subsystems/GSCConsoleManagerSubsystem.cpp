@@ -2,10 +2,12 @@
 
 #include "Subsystems/GSCConsoleManagerSubsystem.h"
 
+#include "CoreGlobals.h"
 #include "GSCLog.h"
 #include "Components/GSCAbilityQueueComponent.h"
 #include "Components/GSCComboManagerComponent.h"
 #include "GameFramework/Pawn.h"
+#include "Misc/EngineVersionComparison.h"
 #include "UI/GSCUWDebugAbilityQueue.h"
 #include "UI/GSCUWDebugComboWidget.h"
 
@@ -89,12 +91,17 @@ void UGSCConsoleManagerSubsystem::ResetRegisteredCommands()
 
 FString UGSCConsoleManagerSubsystem::GetConsoleCommandSuffix()
 {
-	if (GPlayInEditorID == 0)
+#if UE_VERSION_OLDER_THAN(5, 5, 0)
+	const int32 PlayInEditorID = GPlayInEditorID;
+#else
+	const int32 PlayInEditorID = UE::GetPlayInEditorID();
+#endif
+	if (PlayInEditorID == 0)
 	{
 		return TEXT("");
 	}
 
-	return FString::Printf(TEXT(".PIE_%d"), GPlayInEditorID);
+	return FString::Printf(TEXT(".PIE_%d"), PlayInEditorID);
 }
 
 void UGSCConsoleManagerSubsystem::RegisterConsoleCommand(const TCHAR* Name, const TCHAR* Help, const FConsoleCommandWithWorldArgsAndOutputDeviceDelegate& Command, uint32 Flags)

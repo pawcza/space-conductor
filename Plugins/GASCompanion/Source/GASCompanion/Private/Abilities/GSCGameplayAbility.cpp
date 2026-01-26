@@ -163,6 +163,46 @@ void UGSCGameplayAbility::AbilityEnded(UGameplayAbility* Ability)
 	OnAbilityEnded.Clear();
 }
 
+bool UGSCGameplayAbility::K2_CommitAbilityCooldown(bool bBroadcastCommitEvent, bool bForceCooldown)
+{
+	ensure(CurrentActorInfo);
+	
+	if (!CommitAbilityCooldown(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, bForceCooldown))
+	{
+		return false;
+	}
+	
+	if (bBroadcastCommitEvent)
+	{
+		if (UAbilitySystemComponent* AbilitySystemComponent = GetAbilitySystemComponentFromActorInfo_Ensured())
+		{
+			AbilitySystemComponent->NotifyAbilityCommit(this);
+		}
+	}
+	
+	return true;
+}
+
+bool UGSCGameplayAbility::K2_CommitAbilityCost(bool bBroadcastCommitEvent)
+{
+	ensure(CurrentActorInfo);
+	
+	if (!CommitAbilityCost(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo))
+	{
+		return false;
+	}
+	
+	if (bBroadcastCommitEvent)
+	{
+		if (UAbilitySystemComponent* AbilitySystemComponent = GetAbilitySystemComponentFromActorInfo_Ensured())
+		{
+			AbilitySystemComponent->NotifyAbilityCommit(this);
+		}
+	}
+	
+	return true;
+}
+
 bool UGSCGameplayAbility::CheckForPositiveCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const
 {
 	UGameplayEffect* CostGE = GetCostGameplayEffect();

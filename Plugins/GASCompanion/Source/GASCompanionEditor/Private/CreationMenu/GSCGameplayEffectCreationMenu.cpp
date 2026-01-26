@@ -105,7 +105,7 @@ void UGSCGameplayEffectCreationMenu::AddDefinition(const FString MenuPath, const
 {
 	if (!ParentClass)
 	{
-		EDITOR_LOG(Warning, TEXT("Can't add Gameplay Effect Definitions for %s, no valid parent class"), *MenuPath)
+		GSC_EDITOR_LOG(Warning, TEXT("Can't add Gameplay Effect Definitions for %s, no valid parent class"), *MenuPath)
 		return;
 	}
 

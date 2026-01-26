@@ -207,7 +207,7 @@ void UGSCGameFeatureAction_AddAnimLayers::RemoveAnimLayers(AActor* Actor)
 	{
 		if (UGSCLinkAnimLayersComponent* LinkAnimLayersComponent = Actor->FindComponentByClass<UGSCLinkAnimLayersComponent>())
 		{
-			for (const TSubclassOf<UAnimInstance> AnimLayer : ActorExtensions->AnimLayers)
+			for (const TSubclassOf<UAnimInstance>& AnimLayer : ActorExtensions->AnimLayers)
 			{
 				LinkAnimLayersComponent->UnlinkAnimLayer(AnimLayer);
 			}
